@@ -20,6 +20,18 @@ body {
   left: 0;
   bottom: 0;
   right: 0;
+
+  background-image: url('assets/sky.png');
+  background-repeat: repeat-x;
+  background-position: 0px 100%;
+  background-color: #4ec0ca;
+  
+  animation: animSky 7s linear infinite;
+}
+
+@keyframes animSky {
+  0% { background-position: 0px 100%; }
+  100% { background-position: -275px 100%; }
 }
 
 canvas {
