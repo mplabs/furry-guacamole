@@ -3,6 +3,20 @@ Floppybird
 
 A flappybird clone to teach HTML canvas operations
 
+Instructions
+=====
+
+1. Make sure nodejs is installed.
+
+2. To install the dependencies
+   run `npm install` in this directory
+
+3. To start the development server
+   run `npm run dev`
+
+The server will autmatically reload the page with every file save.
+
+
 Credit
 =====
 
@@ -21,4 +35,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
 See the License for the specific language governing permissions and  
 limitations under the License.
-

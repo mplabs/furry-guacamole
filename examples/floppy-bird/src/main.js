@@ -17,38 +17,29 @@ let width = 0, height = 0
 class Game {
   constructor() {
     // We start the game on the splash screen
-    this.state = GAME_STATE.SPLASH_SCREEN
   }
 
   start() {
     // Setup all the objects
-    this.player = new Player()
-
+        
     // Set the game state to playing
-    this.state = GAME_STATE.GAME_SCREEN
-
+    
     // Start the game loop
-    this.loop()
   }
 
   handleClick() {
-    if (this.state === GAME_STATE.SPLASH_SCREEN) {
-      this.start()
-    } else {
-      this.player.jump()
-    }
+    // If the game is in the splash screen state, start the game
+    // else, make the player jump
+
   }
 
   loop() {
     // Update all the objects
-    this.player.update()
-
+    
     // Every new frame, we need to clear the canvas
-    ctx.clearRect(0, 0, width, height)
-
+    
     // Draw all the objects to the canvas
-    this.player.draw()
-
+    
     // When done and player alive, wait for the next frame and start over
     if (this.state === GAME_STATE.GAME_SCREEN) {
       window.requestAnimationFrame(this.loop.bind(this))
@@ -70,18 +61,17 @@ class Player {
   }
 
   draw() {
-    // Update the frame counter
-    this.nthFrame = this.nthFrame + 1
-
+    // Inrement the frame counter
+    
     ctx.save() // We need to create a 'sub-canvas' that we can move around without effecting the other objects
 
     // Pick the n-th sprite from our bird picture and increment every 5-th drawn frame
-    let spriteNumber = Math.floor(this.nthFrame/5) % 4
+    let spriteNumber = 
 
     // Move the sub-canvas to the position where we want to draw the bird
     ctx.translate(
-      60,                     // The bird is always 60px from the left
-      ( 200 + this.position)  // The y-position of the bird is offset by 200px from the top
+      // x - The bird is always 60px from the left
+      // y - the bird is offset by 200px from the top
     )
 
     // Rotate the sub-canvas
@@ -91,15 +81,15 @@ class Player {
     
     // Draw the sprite to the sub-canvas
     ctx.drawImage(
-      this.image,           // 'assets/bird.png'
-      0,                    // Start to draw from the top left corner of the image
-      24 * spriteNumber,    // we slice four 24px parts of the image and show one of them depending on the position of the birds wings
-      34,                   // We want the bird to be drawn with a width of 34px
-      24,                   // and a height of 24px
-      -17,                  // Since we 'moved' the canvas, draw the center of the sprite
-      -12,                  // ...by shifting the image to the left and top by half it's size
-      34,                   // We need to tell the canvas what whidth to draw again
-      24,                   // ...also what height
+      image,    // The image we created above
+      sx,       // The x-axis coordinate of the top left corner of the sub-rectangle of the source image
+      sy,       // The y-axis coordinate of the top left corner of the sub-rectangle of the source image
+      sWidth,   // The width of the sub-rectangle of the source image
+      sHeight,  // The height of the sub-rectangle of the source image
+      dx,       // The x-axis coordinate in the destination canvas at which to place the top-left corner of the image
+      dy,       // The y-axis coordinate in the destination canvas at which to place the top-left corner of the source image
+      dWidth,   // The width to draw the image in the destination canvas.
+      dHeight   // The height to draw the image in the destination canvas.
     )
       
     ctx.restore() // Restoring the canvas will reset the canvas to the top left corner of the frame and nulligate the rotation
@@ -114,7 +104,8 @@ class Player {
 
   // Player jump
   jump() {
-    this.velocity = JUMP
+    // Make the player jump
+    
   }
 }
 
