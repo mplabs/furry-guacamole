@@ -17,29 +17,41 @@ let width = 0, height = 0
 class Game {
   constructor() {
     // We start the game on the splash screen
+    this.state = GAME_STATE.SPLASH_SCREEN
   }
 
   start() {
     // Setup all the objects
-        
+   this.player=new Player()
+   this.pipe=new Pipe()
     // Set the game state to playing
-    
+   this.state = GAME_STATE.GAME_SCREEN
     // Start the game loop
+   this.loop()
   }
 
   handleClick() {
     // If the game is in the splash screen state, start the game
     // else, make the player jump
-
+    if (this.state == GAME_STATE.SPLASH_SCREEN){
+    this.start()
+    } else {
+    this.player.jump()
+    }
   }
 
   loop() {
     // Update all the objects
-    
+    this.player.update()
+    this.pipe.update()
+    if(this.player.dead==true){
+    this.state= GAME_STATE.SCORE_SCREEN
+    }
     // Every new frame, we need to clear the canvas
-    
+    ctx.clearRect(0,0, width,height)
     // Draw all the objects to the canvas
-    
+    this.player.draw()
+    this.pipe.draw()
     // When done and player alive, wait for the next frame and start over
     if (this.state === GAME_STATE.GAME_SCREEN) {
       window.requestAnimationFrame(this.loop.bind(this))
@@ -58,18 +70,22 @@ class Player {
     this.velocity = 0
     this.rotation = 0
     this.nthFrame = 0
+    this.dead=false
   }
 
   draw() {
     // Inrement the frame counter
+    this.nthFrame= this.nthFrame+1;
     
     ctx.save() // We need to create a 'sub-canvas' that we can move around without effecting the other objects
 
     // Pick the n-th sprite from our bird picture and increment every 5-th drawn frame
-    let spriteNumber = 
+    let spriteNumber = Math.floor((this.nthFrame)/5) % 4 // 0, 1, 2, 3
+
 
     // Move the sub-canvas to the position where we want to draw the bird
     ctx.translate(
+    60, this.position+200
       // x - The bird is always 60px from the left
       // y - the bird is offset by 200px from the top
     )
@@ -81,15 +97,15 @@ class Player {
     
     // Draw the sprite to the sub-canvas
     ctx.drawImage(
-      image,    // The image we created above
-      sx,       // The x-axis coordinate of the top left corner of the sub-rectangle of the source image
-      sy,       // The y-axis coordinate of the top left corner of the sub-rectangle of the source image
-      sWidth,   // The width of the sub-rectangle of the source image
-      sHeight,  // The height of the sub-rectangle of the source image
-      dx,       // The x-axis coordinate in the destination canvas at which to place the top-left corner of the image
-      dy,       // The y-axis coordinate in the destination canvas at which to place the top-left corner of the source image
-      dWidth,   // The width to draw the image in the destination canvas.
-      dHeight   // The height to draw the image in the destination canvas.
+      this.image,    // The image we created above
+      0,       // The x-axis coordinate of the top left corner of the sub-rectangle of the source image
+      spriteNumber*24,       // The y-axis coordinate of the top left corner of the sub-rectangle of the source image
+      34,   // The width of the sub-rectangle of the source image
+      24,  // The height of the sub-rectangle of the source image
+      -17,       // The x-axis coordinate in the destination canvas at which to place the top-left corner of the image
+      -12,       // The y-axis coordinate in the destination canvas at which to place the top-left corner of the source image
+      34,   // The width to draw the image in the destination canvas.
+      24   // The height to draw the image in the destination canvas.
     )
       
     ctx.restore() // Restoring the canvas will reset the canvas to the top left corner of the frame and nulligate the rotation
@@ -97,26 +113,33 @@ class Player {
 
   // Update player position and velocity
   update() {
-    this.velocity = this.velocity + GRAVITY
-    this.position = this.position + this.velocity
-    this.rotation = Math.min(this.velocity / 10 * 90, 90)
+  if(this.dead==false){
+  this.velocity = this.velocity + GRAVITY
+      this.position = this.position + this.velocity
+      this.rotation = Math.min(this.velocity / 10 * 90, 90)
+      if(this.position+200>=height-24){
+        this.dead=true
+      }
+  }
+
   }
 
   // Player jump
   jump() {
     // Make the player jump
-    
+    this.velocity = JUMP
   }
 }
 
 // Setup the game and start the loop
-const game = new Game()
+let game = new Game()
 
 // Handle key events
 window.addEventListener('keyup', evt => {
   if (evt.code === 'Space') {
-    if (gameState === GAME_STATE.SCORE_SCREEN) {
+    if (game.state === GAME_STATE.SCORE_SCREEN) {
       // Replay the game...
+      game = new Game()
     }
     game.handleClick()
   }
@@ -137,4 +160,19 @@ function resizeCanvas(canvas) {
   canvas.setAttribute('height', height)
 
   return { width, height }
+}
+
+class Pipe{
+    constructor(){
+        this.velocity=-1
+        this.distance=60
+        this.y=Math.random()*height/2
+        this.x=width
+    }
+    update(){
+    this.x=this.x+this.velocity
+    }
+    draw(){
+    ctx.fillRect(this.x,this.y,20,10)
+    }
 }
