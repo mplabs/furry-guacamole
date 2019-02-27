@@ -44,11 +44,39 @@ class Game {
     // Update all the objects
     this.player.update()
     this.pipe.update()
+
+    //collision with upper pipe
+    if(
+        this.pipe.x < this.player.x + this.player.width &&
+        0 < this.player.position + this.player.height &&
+        this.pipe.x + this.pipe.width > this.player.x &&
+        this.pipe.upperHeight > this.player.y
+    ) {
+        this.player.dead=true
+        console.log('upper pipe')
+    }
+
+//    if(
+//        94>this.pipe.x &&
+//        this.player.position+24<this.pipe.y+24
+//    ){
+//        this.player.dead=true
+//        console.log('upper pipe')
+//    }
+//    if(
+//        94>this.pipe.x &&
+//        this.player.position+24>this.pipe.y+24+100
+//    ) {
+//        this.player.dead=true
+//        console.log('lower pipe')
+//    }
+
     if(this.player.dead==true){
     this.state= GAME_STATE.SCORE_SCREEN
     }
     // Every new frame, we need to clear the canvas
     ctx.clearRect(0,0, width,height)
+
     // Draw all the objects to the canvas
     this.player.draw()
     this.pipe.draw()
@@ -71,6 +99,9 @@ class Player {
     this.rotation = 0
     this.nthFrame = 0
     this.dead=false
+    this.width= 34
+    this.height= 24
+    this.x=60
   }
 
   draw() {
@@ -94,7 +125,7 @@ class Player {
     ctx.rotate(
       this.rotation * Math.PI/180  // Convert angle to radiant
     )
-    
+
     // Draw the sprite to the sub-canvas
     ctx.drawImage(
       this.image,    // The image we created above
@@ -164,15 +195,37 @@ function resizeCanvas(canvas) {
 
 class Pipe{
     constructor(){
+        this.pipeDown = new Image(52, 26)
+        this.pipeDown.src = 'assets/pipe-down.png'
+        this.pipe = new Image(52, 1)
+        this.pipe.src = 'assets/pipe.png'
+        this.pipeUp = new Image(52, 26)
+        this.pipeUp.src = 'assets/pipe-up.png'
+
+
         this.velocity=-1
         this.distance=60
         this.y=Math.random()*height/2
         this.x=width
+        this.width= 52
+
     }
+
+    get upperHeight() {
+        return this.y + 26
+    }
+
+    get lowerHeight() {
+        return height - this.upperHeight() + 100
+    }
+
     update(){
     this.x=this.x+this.velocity
     }
     draw(){
-    ctx.fillRect(this.x,this.y,20,10)
+    ctx.drawImage(this.pipeDown,this.x,this.y)
+    ctx.drawImage(this.pipe, this.x,0, 52, this.y)
+    ctx.drawImage(this.pipeUp, this.x, this.y+26+100)
+    ctx.drawImage(this.pipe, this.x,this.y+152, 52, height-this.y+152)
     }
 }
