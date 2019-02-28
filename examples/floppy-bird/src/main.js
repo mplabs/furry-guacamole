@@ -15,10 +15,19 @@ const ctx = canvas.getContext('2d')
 let width = 0
 let height = 0
 
+function collision(a, b) {
+  return (
+    b.x < a.x + a.width &&
+    b.y < a.y + a.height &&
+    b.x + b.width > a.x &&
+    b.y + b.height > a.y
+  )
+}
+
 class Game {
   _state = GAME_STATE.SPLASH_SCREEN
   _lastState = null
-  set state (value) {
+  set state(value) {
     this._lastState = this._state
     this._state = value
 
@@ -27,16 +36,16 @@ class Game {
     }
   }
 
-  get state () {
+  get state() {
     return this._state
   }
 
-  constructor () {
+  constructor() {
     // We start the game on the splash screen
     this.state = GAME_STATE.SPLASH_SCREEN
   }
 
-  start () {
+  start() {
     // Setup all the objects
     this.player = new Player()
     this.pipe = new Pipe()
@@ -46,7 +55,7 @@ class Game {
     this.loop()
   }
 
-  handleClick () {
+  handleClick() {
     // If the game is in the splash screen state, start the game
     // else, make the player jump
     if (this.state == GAME_STATE.SPLASH_SCREEN) {
@@ -56,36 +65,21 @@ class Game {
     }
   }
 
-  loop () {
+  loop() {
     // Update all the objects
     this.player.update()
     this.pipe.update()
 
-    // collision with upper pipe
+    // Collision with pipe
+    const playerBoundingBox = this.player.box
+    const upperPipeBoundingBox = this.pipe.upperBox
+    const lowerPipeBoundingBox = this.pipe.lowerBox
     if (
-      this.pipe.x < this.player.x + this.player.width &&
-      this.player.position + this.player.height > 0 &&
-      this.pipe.x + this.pipe.width > this.player.x &&
-      this.pipe.upperHeight > this.player.y
+      collision(playerBoundingBox, upperPipeBoundingBox) ||
+      collision(playerBoundingBox, lowerPipeBoundingBox)
     ) {
       this.player.dead = true
-      console.log('upper pipe')
     }
-
-    //    if(
-    //        94>this.pipe.x &&
-    //        this.player.position+24<this.pipe.y+24
-    //    ){
-    //        this.player.dead=true
-    //        console.log('upper pipe')
-    //    }
-    //    if(
-    //        94>this.pipe.x &&
-    //        this.player.position+24>this.pipe.y+24+100
-    //    ) {
-    //        this.player.dead=true
-    //        console.log('lower pipe')
-    //    }
 
     if (this.player.dead == true) {
       this.state = GAME_STATE.SCORE_SCREEN
@@ -93,10 +87,8 @@ class Game {
     // Every new frame, we need to clear the canvas
     ctx.clearRect(0, 0, width, height)
 
-    ctx.strokeStyle = 'green'
-    ctx.strokeRect *
-      // Draw all the objects to the canvas
-      this.player.draw()
+    // Draw all the objects to the canvas
+    this.player.draw()
     this.pipe.draw()
     // When done and player alive, wait for the next frame and start over
     if (this.state === GAME_STATE.GAME_SCREEN) {
@@ -106,7 +98,7 @@ class Game {
 }
 
 class Player {
-  constructor () {
+  constructor() {
     // Load the bird spritesheet
     this.image = new Image(34, 96)
     this.image.src = 'assets/bird.png'
@@ -122,7 +114,17 @@ class Player {
     this.x = 60
   }
 
-  draw () {
+  // Calculate the bounding box
+  get box() {
+    return {
+      x: 60 - 17,
+      y: this.position - 12,
+      height: this.height - Math.cos(Math.abs(this.position) / 90) * 8,
+      width: this.width - Math.sin(Math.abs(this.rotation) / 90) * 8
+    }
+  }
+
+  draw() {
     // Inrement the frame counter
     this.nthFrame = this.nthFrame + 1
 
@@ -133,10 +135,8 @@ class Player {
 
     // Move the sub-canvas to the position where we want to draw the bird
     ctx.translate(
-      60,
-      this.position + 200
-      // x - The bird is always 60px from the left
-      // y - the bird is offset by 200px from the top
+      60, // x - The bird is always 60px from the left
+      this.position // y - The height of the bird is calculated with every update
     )
 
     // Rotate the sub-canvas
@@ -161,19 +161,19 @@ class Player {
   }
 
   // Update player position and velocity
-  update () {
+  update() {
     if (this.dead == false) {
       this.velocity = this.velocity + GRAVITY
       this.position = this.position + this.velocity
       this.rotation = Math.min((this.velocity / 10) * 90, 90)
-      if (this.position + 200 >= height - 24) {
+      if (this.position >= height - 24 || this.position < 0) {
         this.dead = true
       }
     }
   }
 
   // Player jump
-  jump () {
+  jump() {
     // Make the player jump
     this.velocity = JUMP
   }
@@ -197,7 +197,7 @@ window.addEventListener('keyup', evt => {
 window.addEventListener('load', resizeCanvas.bind(null, canvas), false)
 window.addEventListener('resize', resizeCanvas.bind(null, canvas), false)
 
-function resizeCanvas (canvas) {
+function resizeCanvas(canvas) {
   const rect = canvas.getBoundingClientRect()
 
   // Update the width and height variables for drawing
@@ -211,7 +211,7 @@ function resizeCanvas (canvas) {
 }
 
 class Pipe {
-  constructor () {
+  constructor() {
     this.pipeDown = new Image(52, 26)
     this.pipeDown.src = 'assets/pipe-down.png'
     this.pipe = new Image(52, 1)
@@ -219,25 +219,43 @@ class Pipe {
     this.pipeUp = new Image(52, 26)
     this.pipeUp.src = 'assets/pipe-up.png'
 
-    this.velocity = -1
+    this.velocity = -2.25
     this.distance = 60
     this.y = (Math.random() * height) / 2
-    this.x = width
+    this.x = width / 2
     this.width = 52
   }
 
-  get upperHeight () {
+  get upperBox() {
+    return {
+      x: this.x,
+      y: 0,
+      width: this.width,
+      height: this.y + 26
+    }
+  }
+
+  get lowerBox() {
+    return {
+      x: this.x,
+      y: this.y + 126,
+      width: this.width,
+      height: height - this.y + 126
+    }
+  }
+
+  get upperHeight() {
     return this.y + 26
   }
 
-  get lowerHeight () {
+  get lowerHeight() {
     return height - this.upperHeight() + 100
   }
 
-  update () {
+  update() {
     this.x = this.x + this.velocity
   }
-  draw () {
+  draw() {
     ctx.drawImage(this.pipeDown, this.x, this.y)
     ctx.drawImage(this.pipe, this.x, 0, 52, this.y)
     ctx.drawImage(this.pipeUp, this.x, this.y + 26 + 100)
