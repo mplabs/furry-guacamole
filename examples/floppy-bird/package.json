@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "webpack.config.js",
   "scripts": {
+    "prebuild": "rm -rf dist/",
+    "build": "webpack --config webpack.config.js --mode production",
     "dev": "webpack-dev-server --config webpack.config.js --inline --hot",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
