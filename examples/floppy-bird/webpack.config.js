@@ -16,12 +16,24 @@ module.exports = {
     rules: [
       {
         test: /\.js/,
-        // Use current .babelrc instead of dependencies
-        loader: `babel-loader?babelrc=false&extends=${__dirname}/.babelrc`
+        use: [{
+          // Use current .babelrc instead of dependencies
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            extends: `${__dirname}/.babelrc`,
+            plugins: ['@babel/plugin-proposal-class-properties']
+          }
+        }]
+        // loader: `babel-loader?babelrc=false&extends=${__dirname}/.babelrc`
       },
       {
         test: /\.css$/,
         loader: 'style-loader!css-loader!postcss-loader'
+      },
+      {
+        test: /\.scss$/,
+        loader: 'style-loader!css-loader!postcss-loader!sass-loader'
       },
       {
         test: /\.(png|jpg|gif)$/,
