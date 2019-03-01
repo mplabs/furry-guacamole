@@ -1,4 +1,11 @@
+// Import stylesheed
 require('./style.scss')
+
+// Import asset graphics
+const birdImage = require('./assets/bird.png')
+const pipeUpImage = require('./assets/pipe-up.png')
+const pipeDownImage = require('./assets/pipe-down.png')
+const pipeImage = require('./assets/pipe.png')
 
 const GRAVITY = 0.25
 const JUMP = -4.6
@@ -101,7 +108,7 @@ class Player {
   constructor() {
     // Load the bird spritesheet
     this.image = new Image(34, 96)
-    this.image.src = 'assets/bird.png'
+    this.image.src = birdImage
 
     // Set initial values
     this.position = 180
@@ -213,11 +220,11 @@ function resizeCanvas(canvas) {
 class Pipe {
   constructor() {
     this.pipeDown = new Image(52, 26)
-    this.pipeDown.src = 'assets/pipe-down.png'
+    this.pipeDown.src = pipeDownImage
     this.pipe = new Image(52, 1)
-    this.pipe.src = 'assets/pipe.png'
+    this.pipe.src = pipeImage
     this.pipeUp = new Image(52, 26)
-    this.pipeUp.src = 'assets/pipe-up.png'
+    this.pipeUp.src = pipeUpImage
 
     this.velocity = -2.25
     this.distance = 60
